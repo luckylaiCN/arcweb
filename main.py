@@ -8,7 +8,7 @@ import base64
 import requests
 
 from dotenv import load_dotenv
-project_folder = os.path.expanduser(os.path.dirname(os.path.abspath(__file__)))
+project_folder = os.path.dirname(os.path.abspath(__file__))
 load_dotenv(os.path.join(project_folder, 'env_conf'))
 
 from flask import Flask
