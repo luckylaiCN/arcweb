@@ -7,7 +7,11 @@ import os
 import base64
 import requests
 
-from flask import Flask,make_response
+from dotenv import load_dotenv
+project_folder = os.path.expanduser(os.path.dirname(os.path.abspath(__file__)))
+load_dotenv(os.path.join(project_folder, 'env_conf'))
+
+from flask import Flask
 
 def pprint(*arg,**kwargs):
     print(*arg,**kwargs)
@@ -92,7 +96,7 @@ class ArcBot:
         songname = difficulty_info.name_en
         illustration_b64 = base64.b64encode(self.get_song_asset(song_id,recent_play_song.difficulty)).decode()
         return gen_svg(illustration_b64,rating,username,score,songname,difficulty,difficulty_level,shiny_perfect_count,perfect_count,near_count,miss_count)
-        
+
 url = os.environ["host"]
 token = os.environ["token"]
 usercode = os.environ["usercode"]
