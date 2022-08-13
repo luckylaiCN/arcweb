@@ -3,6 +3,7 @@ import os
 import base64
 import requests
 import datetime
+import pytz
 
 from typing import List
 
@@ -16,6 +17,10 @@ from flask import Flask
 
 def pprint(*arg,**kwargs):
     print(*arg,**kwargs)
+
+timezone = os.environ.get("timezone","Asia/Shanghai")
+py_timezone = pytz.timezone(timezone)
+utc = pytz.timezone("UTC")
 
 class ArcBot:
     song_list : List[songlist.SongListElement]
@@ -97,7 +102,10 @@ class ArcBot:
         songname = difficulty_info.name_en
         illustration_b64 = base64.b64encode(self.get_song_asset(song_id,recent_play_song.difficulty)).decode()
         playptt = "%.3f"%(recent_play_song.rating)
-        playtime = datetime.datetime.utcfromtimestamp(recent_play_song.time_played / 1000).strftime("%Y.%m.%d %H:%M:%S")
+        time0 = datetime.datetime.utcfromtimestamp(recent_play_song.time_played / 1000)
+        utc_time = datetime.datetime(time0.year,time0.month,time0.day,time0.hour,time0.minute,time0.second,time0.microsecond,tzinfo=utc)
+        datetime_zoned = utc_time.astimezone(py_timezone)
+        playtime = datetime_zoned.strftime("%Y.%m.%d %H:%M:%S")
         return svgGenerator.gen_svg(illustration_b64,rating,username,score,songname,difficulty,difficulty_level,shiny_perfect_count,perfect_count,near_count,miss_count,playtime,playptt)
 
 url = os.environ["host"]

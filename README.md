@@ -20,6 +20,7 @@ Add `Environment Variables`
 host = "xxxxxx" # for ArcaeaUnlimitedApi
 token = "xxxxxx" # for ArcaeaUnlimitedApi
 usercode = "xxxxxx" # your user code in Arcaea
+timezone = "xxxxxx" # [optional] Asia/Shanghai for default
 ```
 
 Click `Deploy `and wait for building
