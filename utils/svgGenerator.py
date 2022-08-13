@@ -46,7 +46,7 @@ def get_score_formatted(score):
     full = str(score).rjust(8,'0')[-8:]
     return f"{full[:2]}'{full[2:5]}'{full[5:8]}"
 
-def gen_svg(illustration_base64,ptt,username,score,songName,difficulty,difficulty_level,shiny_perfect_count,perfect_count,near_count,miss_count):
+def gen_svg(illustration_base64,ptt,username,score,songName,difficulty,difficulty_level,shiny_perfect_count,perfect_count,near_count,miss_count,play_time,play_ptt):
     result = mod_svg.format(
         illustration = "data:image/jpeg;base64," + illustration_base64,
         ratingFrame = "data:image/png;base64," + rating_frames[get_rating(ptt)],
@@ -58,5 +58,7 @@ def gen_svg(illustration_base64,ptt,username,score,songName,difficulty,difficult
         pureCount = f"{perfect_count}(+{shiny_perfect_count})",  
         farCount = near_count,
         lostCount = miss_count,
+        playTime = play_time,
+        playPTT = play_ptt
     )
     return result
