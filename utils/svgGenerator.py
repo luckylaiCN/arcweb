@@ -2,9 +2,13 @@ import os
 import base64
 
 file_dir = os.path.dirname(os.path.abspath(__file__))
-mod_svg_path = os.path.join(file_dir,"mod.svg")
-with open(mod_svg_path) as f:
-    mod_svg = f.read()
+svg_mod_path = os.path.join(file_dir,"mod.svg")
+svg_500_path = os.path.join(file_dir,"500.svg")
+with open(svg_mod_path) as f:
+    svg_mod = f.read()
+
+with open(svg_500_path) as f:
+    svg_500 = f.read()
 
 rating_keys = ["0","1","2","3","4","5","6","7","off"]
 rating_frames = {}
@@ -33,6 +37,9 @@ def get_rating(ptt):
     else:
         return "7"
 
+def return_500():
+    return svg_500
+
 def get_difficulty(diff):
     if diff < 9:
         return str(int(diff))
@@ -47,7 +54,7 @@ def get_score_formatted(score):
     return f"{full[:2]}'{full[2:5]}'{full[5:8]}"
 
 def gen_svg(illustration_base64,ptt,username,score,songName,difficulty,difficulty_level,shiny_perfect_count,perfect_count,near_count,miss_count,play_time,play_ptt):
-    result = mod_svg.format(
+    result = svg_mod.format(
         illustration = "data:image/jpeg;base64," + illustration_base64,
         ratingFrame = "data:image/png;base64," + rating_frames[get_rating(ptt)],
         ratingScore = "" if ptt==-1 else str(format("%.2f"%(ptt/100))),

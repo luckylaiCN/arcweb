@@ -4,6 +4,8 @@ import base64
 import requests
 import datetime
 import pytz
+import traceback
+import time
 
 from typing import List
 
@@ -13,7 +15,7 @@ sys.path.append(project_folder)
 from JSON import songlist,account
 from utils import svgGenerator
 
-from flask import Flask
+from flask import Flask,jsonify
 
 def pprint(*arg,**kwargs):
     print(*arg,**kwargs)
@@ -22,6 +24,30 @@ timezone = os.environ.get("timezone","Asia/Shanghai")
 py_timezone = pytz.timezone(timezone)
 utc = pytz.timezone("UTC")
 
+def do_nothing():
+    return None
+
+class ExceptionHandler:
+    def __init__(self):
+        self.last = ""
+        self.timestamp = 0
+
+    def safe_handle(self,func,onerror=do_nothing):
+        try:
+            return func()
+        except:
+            self.last = traceback.format_exc()
+            self.timestamp = int(time.time() * 1e3)
+            return onerror()
+
+    def get_last_exception(self):
+        return {
+            "exception" : self.last,
+            "time" : self.timestamp
+        }
+
+
+
 class ArcBot:
     song_list : List[songlist.SongListElement]
     song_id_difficulties_dict : dict
@@ -29,7 +55,8 @@ class ArcBot:
         self.url = url 
         self.token = token
         self.header = {
-            "User-Agent" : self.token
+            "User-Agent" : self.token,
+            "Authorization" : f"Bearer {self.token}"
         }
         self.session = requests.session()
         self.song_list = []
@@ -60,7 +87,7 @@ class ArcBot:
         return self.url + uri
 
     def get_song_asset(self,song_id,difficulty):
-        return self.get_content(url = self.u(f"assets/song?songid={song_id}&difficulty={difficulty}"))
+        return self.get_content(url = self.u(f"assets/song?songid={song_id}&difficulty={difficulty}"),ispublic=False)
 
     def get_song_list(self):
         response = self.get_json(url = self.u("song/list"))
@@ -113,11 +140,16 @@ token = os.environ["token"]
 usercode = os.environ["usercode"]
 app = Flask(__name__)
 handler = ArcBot(url,token)
+exception_handler = ExceptionHandler()
 
 @app.route("/")
 def index():
-    svg = handler.generate_recent_svg(usercode)
+    svg = exception_handler.safe_handle(lambda:handler.generate_recent_svg(usercode),svgGenerator.return_500)
     return app.response_class(svg,mimetype="image/svg+xml")
+
+@app.route("/log")
+def log():
+    return jsonify(exception_handler.get_last_exception())
 
 if __name__ == "__main__":
     app.run()
