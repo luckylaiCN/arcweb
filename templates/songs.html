@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+    </head>
+    <body>
+        <div style="text-align: center;">
+            <table style="margin: auto;">
+                {% for song in data %}
+                    <tr>
+                        <td style="width: 40%">{{ song }}</td>
+                        {% for difficulty in song.difficulties %}
+                            {% if difficulty %}
+                                <td style="width: 15%">
+                                    <a href="/best?song={{song.song_id}}&difficulty={{difficulty.key}}&s={{s}}">
+                                        {{ difficulty }}
+                                    </a>
+                                </td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </body>
+</html>

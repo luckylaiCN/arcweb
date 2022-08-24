@@ -9,13 +9,13 @@ import time
 
 from typing import List
 
-from flask import Flask,jsonify,request
+from flask import Flask,jsonify,request,render_template
 
 project_folder = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(project_folder)
 
 from JSON import songlist,account
-from utils import svgGenerator,auth
+from utils import svgGenerator,auth,html
 
 
 
@@ -63,6 +63,8 @@ class ArcBot:
         self.session = requests.session()
         self.song_list = []
         self.song_id_difficulties_dict = {}
+        self.songs_html = []
+        self.get_song_list()
 
     def get(self,ispublic=True,*arg,**kwargs):
         headers = {}
@@ -104,6 +106,8 @@ class ArcBot:
         self.song_id_difficulties_dict = {}
         for item in self.song_list:
             self.song_id_difficulties_dict[item.song_id] = item.difficulties
+            self.songs_html.append(html.Song(item))
+        self.songs_html.sort(key = lambda x : x.song_name)
         return self.song_list
 
     def get_user_by_code(self,uid):
@@ -197,6 +201,10 @@ def best():
         svgGenerator.return_500
     )
     return app.response_class(svg,mimetype="image/svg+xml")
+
+@app.route("/songlist")
+def songlist():
+    return render_template("songs.html",data=arc_handler.songs_html,s=request.args.get("s","default"))
 
 if __name__ == "__main__":
     app.run()
