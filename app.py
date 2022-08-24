@@ -15,7 +15,7 @@ project_folder = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(project_folder)
 
 from JSON import songlist,account
-from utils import svgGenerator
+from utils import svgGenerator,auth
 
 
 
@@ -171,13 +171,18 @@ class ArcBot:
 url = os.environ["host"]
 token = os.environ["token"]
 usercode = os.environ["usercode"]
+auth_key = os.environ["auth"]
+
 app = Flask(__name__)
-handler = ArcBot(url,token)
+
+arc_handler = ArcBot(url,token)
 exception_handler = ExceptionHandler()
+auth_handler = auth.Controller(auth_key,usercode)
 
 @app.route("/")
 def index():
-    svg = exception_handler.safe_handle(lambda:handler.generate_recent_svg(usercode),svgGenerator.return_500)
+    request_user = auth_handler.get_id(request.args.get("s","default"))
+    svg = exception_handler.safe_handle(lambda:arc_handler.generate_recent_svg(request_user),svgGenerator.return_500)
     return app.response_class(svg,mimetype="image/svg+xml")
 
 @app.route("/log")
@@ -186,8 +191,9 @@ def log():
 
 @app.route("/best")
 def best():
+    request_user = auth_handler.get_id(request.args.get("s","default"))
     svg = exception_handler.safe_handle(
-        lambda:handler.generate_best_svg(usercode,request.args.get("song"),request.args.get("difficulty")),
+        lambda:arc_handler.generate_best_svg(request_user,request.args.get("song"),request.args.get("difficulty")),
         svgGenerator.return_500
     )
     return app.response_class(svg,mimetype="image/svg+xml")
