@@ -9,13 +9,15 @@ import time
 
 from typing import List
 
+from flask import Flask,jsonify,request
+
 project_folder = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(project_folder)
 
 from JSON import songlist,account
 from utils import svgGenerator
 
-from flask import Flask,jsonify
+
 
 def pprint(*arg,**kwargs):
     print(*arg,**kwargs)
@@ -74,14 +76,14 @@ class ArcBot:
             response = self.get(ispublic,*arg,**kwargs)
             return response.json()
         except:
-            return None
+            return {}
 
     def get_content(self,ispublic=True,*arg,**kwargs):
         try:
             response = self.get(ispublic,*arg,**kwargs)
             return response.content
         except:
-            pass
+            return b''
         
     def u(self,uri):
         return self.url + uri
@@ -105,7 +107,11 @@ class ArcBot:
         return self.song_list
 
     def get_user_by_code(self,uid):
-        response = self.get_json(url = self.u(f"user/info?usercode={uid}"),ispublic=False)
+        response : dict = self.get_json(url = self.u(f"user/info?usercode={uid}"),ispublic=False)
+        return response.get("content")
+
+    def get_user_best(self,uid,song_id,difficulty):
+        response : dict = self.get_json(ispublic=False,url = self.u(f"user/best?usercode={uid}&songid={song_id}&difficulty={difficulty}"))
         return response.get("content")
 
     def generate_recent_svg(self,uid):
@@ -114,6 +120,33 @@ class ArcBot:
         response = self.get_user_by_code(uid)
         this_account : account.Account = account.account_from_dict(response)
         recent_play_song = this_account.recent_score[0]
+        song_id = recent_play_song.song_id
+        song_info : List[songlist.Difficulty] = self.song_id_difficulties_dict[song_id]
+        difficulty_info = song_info[recent_play_song.difficulty]
+        score = recent_play_song.score
+        shiny_perfect_count = recent_play_song.shiny_perfect_count
+        perfect_count = recent_play_song.perfect_count
+        near_count = recent_play_song.near_count
+        miss_count = recent_play_song.miss_count
+        difficulty_level = difficulty_info.rating / 10
+        difficulty = ["Past","Present","Future","Beyond"][recent_play_song.difficulty]
+        rating = this_account.account_info.rating
+        username = this_account.account_info.name
+        songname = difficulty_info.name_en
+        illustration_b64 = base64.b64encode(self.get_song_asset(song_id,recent_play_song.difficulty)).decode()
+        playptt = "%.3f"%(recent_play_song.rating)
+        time0 = datetime.datetime.utcfromtimestamp(recent_play_song.time_played / 1000)
+        utc_time = datetime.datetime(time0.year,time0.month,time0.day,time0.hour,time0.minute,time0.second,time0.microsecond,tzinfo=utc)
+        datetime_zoned = utc_time.astimezone(py_timezone)
+        playtime = datetime_zoned.strftime("%Y.%m.%d %H:%M:%S")
+        return svgGenerator.gen_svg(illustration_b64,rating,username,score,songname,difficulty,difficulty_level,shiny_perfect_count,perfect_count,near_count,miss_count,playtime,playptt)
+
+    def generate_best_svg(self,uid,song_id,difficulty):
+        if len(self.song_list) == 0:
+            self.get_song_list()
+        response = self.get_user_best(uid,song_id,difficulty)
+        this_account : account.AccountBest = account.account_best_from_dict(response)
+        recent_play_song = this_account.record
         song_id = recent_play_song.song_id
         song_info : List[songlist.Difficulty] = self.song_id_difficulties_dict[song_id]
         difficulty_info = song_info[recent_play_song.difficulty]
@@ -150,6 +183,14 @@ def index():
 @app.route("/log")
 def log():
     return jsonify(exception_handler.get_last_exception())
+
+@app.route("/best")
+def best():
+    svg = exception_handler.safe_handle(
+        lambda:handler.generate_best_svg(usercode,request.args.get("song"),request.args.get("difficulty")),
+        svgGenerator.return_500
+    )
+    return app.response_class(svg,mimetype="image/svg+xml")
 
 if __name__ == "__main__":
     app.run()

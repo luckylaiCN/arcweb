@@ -161,5 +161,84 @@ def account_from_dict(s: Any) -> Account:
 def account_to_dict(x: Account) -> Any:
     return to_class(Account, x)
 
+@dataclass
+class Record:
+    score: int
+    health: int
+    rating: float
+    song_id: str
+    modifier: int
+    difficulty: int
+    clear_type: int
+    best_clear_type: int
+    time_played: int
+    near_count: int
+    miss_count: int
+    perfect_count: int
+    shiny_perfect_count: int
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'Record':
+        assert isinstance(obj, dict)
+        score = from_int(obj.get("score"))
+        health = from_int(obj.get("health"))
+        rating = from_float(obj.get("rating"))
+        song_id = from_str(obj.get("song_id"))
+        modifier = from_int(obj.get("modifier"))
+        difficulty = from_int(obj.get("difficulty"))
+        clear_type = from_int(obj.get("clear_type"))
+        best_clear_type = from_int(obj.get("best_clear_type"))
+        time_played = from_int(obj.get("time_played"))
+        near_count = from_int(obj.get("near_count"))
+        miss_count = from_int(obj.get("miss_count"))
+        perfect_count = from_int(obj.get("perfect_count"))
+        shiny_perfect_count = from_int(obj.get("shiny_perfect_count"))
+        return Record(score, health, rating, song_id, modifier, difficulty, clear_type, best_clear_type, time_played, near_count, miss_count, perfect_count, shiny_perfect_count)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        result["score"] = from_int(self.score)
+        result["health"] = from_int(self.health)
+        result["rating"] = to_float(self.rating)
+        result["song_id"] = from_str(self.song_id)
+        result["modifier"] = from_int(self.modifier)
+        result["difficulty"] = from_int(self.difficulty)
+        result["clear_type"] = from_int(self.clear_type)
+        result["best_clear_type"] = from_int(self.best_clear_type)
+        result["time_played"] = from_int(self.time_played)
+        result["near_count"] = from_int(self.near_count)
+        result["miss_count"] = from_int(self.miss_count)
+        result["perfect_count"] = from_int(self.perfect_count)
+        result["shiny_perfect_count"] = from_int(self.shiny_perfect_count)
+        return result
+
+
+@dataclass
+class AccountBest:
+    account_info: AccountInfo
+    record: Record
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'AccountBest':
+        assert isinstance(obj, dict)
+        account_info = AccountInfo.from_dict(obj.get("account_info"))
+        record = Record.from_dict(obj.get("record"))
+        return AccountBest(account_info, record)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        result["account_info"] = to_class(AccountInfo, self.account_info)
+        result["record"] = to_class(Record, self.record)
+        return result
+
+
+def account_best_from_dict(s: Any) -> AccountBest:
+    return AccountBest.from_dict(s)
+
+
+def account_best_to_dict(x: AccountBest) -> Any:
+    return to_class(AccountBest, x)
+
+
 
 # generated from app.quicktype.io

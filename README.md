@@ -1,10 +1,22 @@
 # **Arcweb**
 
-An svg generator for recently played song in arcaea
+An svg score generator in arcaea
 
+
+## Routes
+
+| route | arg                  | interface            | example                       |
+| ----- | -------------------- | -------------------- | ----------------------------- |
+| /     | -                    | recently played song | /                             |
+| /best | song and difficulty* | best score           | /best?song=nhelv&difficulty=1 |
+
+```
+*song is for songid in arcaea , can be found in songlist
+*difficulty is for short name or full name of difficulties
+	 "future" "ftr" "2" are acceptable
+```
 
 ## Deploy to vercel
-
 
 Fork this repository and import it from [vercel](https://vercel.com/)
 
