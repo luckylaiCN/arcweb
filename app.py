@@ -204,7 +204,10 @@ def best():
 
 @app.route("/songlist")
 def songlist():
-    return render_template("songs.html",data=arc_handler.songs_html,s=request.args.get("s","default"))
+    return exception_handler.safe_handle(
+        lambda : render_template("songs.html",data=arc_handler.songs_html,s=request.args.get("s","default")),
+        lambda : app.response_class(svgGenerator.svg_500,mimetype="image/svg+xml")
+    )
 
 if __name__ == "__main__":
     app.run()

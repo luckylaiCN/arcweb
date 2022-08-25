@@ -4,10 +4,11 @@ An svg score generator in arcaea
 
 ## Routes
 
-| route | arg                  | interface            | example                       |
-| ----- | -------------------- | -------------------- | ----------------------------- |
-| /     | -                    | recently played song | /                             |
-| /best | song and difficulty* | best score           | /best?song=nhelv&difficulty=1 |
+| route     | arg                  | interface            | example                       |
+| --------- | -------------------- | -------------------- | ----------------------------- |
+| /         | -                    | recently played song | /                             |
+| /best     | song and difficulty* | best score           | /best?song=nhelv&difficulty=1 |
+| /songlist | -                    | song list            | /songlist                     |
 
 ```
 *song is for songid in arcaea , can be found in songlist
