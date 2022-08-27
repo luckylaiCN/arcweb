@@ -46,37 +46,6 @@ def to_class(c: Type[T], x: Any) -> dict:
     assert isinstance(x, c)
     return cast(Any, x).to_dict()
 
-
-class SetFriendly(Enum):
-    ABSOLUTE_REASON = "Absolute Reason"
-    ADVERSE_PRELUDE = "Adverse Prelude"
-    AMBIVALENT_VISION = "Ambivalent Vision"
-    ARCAEA = "Arcaea"
-    BINARY_ENFOLD = "Binary Enfold"
-    BLACK_FATE = "Black Fate"
-    CHUNITHM_COLLABORATION = "CHUNITHM Collaboration"
-    CRIMSON_SOLACE = "Crimson Solace"
-    DIVIDED_HEART = "Divided Heart"
-    DYNAMIX_COLLABORATION = "Dynamix Collaboration"
-    EPHEMERAL_PAGE = "Ephemeral Page"
-    ESOTERIC_ORDER = "Esoteric Order"
-    ETERNAL_CORE = "Eternal Core"
-    FINAL_VERDICT = "Final Verdict"
-    GROOVE_COASTER_COLLABORATION = "Groove Coaster Collaboration"
-    LANOTA_COLLABORATION = "Lanota Collaboration"
-    LUMINOUS_SKY = "Luminous Sky"
-    MAIMAI_COLLABORATION = "maimai Collaboration"
-    MEMORY_ARCHIVE = "Memory Archive"
-    MUSE_DASH_COLLABORATION = "Muse Dash Collaboration"
-    O_N_G_E_K_I_COLLABORATION = "O.N.G.E.K.I. Collaboration"
-    SILENT_ANSWER = "Silent Answer"
-    SUNSET_RADIANCE = "Sunset Radiance"
-    TONE_SPHERE_COLLABORATION = "Tone Sphere Collaboration"
-    VICIOUS_LABYRINTH = "Vicious Labyrinth"
-    WACCA_COLLABORATION = "WACCA Collaboration"
-    WORLD_EXTEND = "World Extend"
-
-
 @dataclass
 class Difficulty:
     name_en: str
@@ -85,7 +54,7 @@ class Difficulty:
     bpm: str
     bpm_base: float
     set: str
-    set_friendly: SetFriendly
+    set_friendly: str
     time: int
     side: int
     world_unlock: bool
@@ -110,7 +79,7 @@ class Difficulty:
         bpm = from_str(obj.get("bpm"))
         bpm_base = from_float(obj.get("bpm_base"))
         set = from_str(obj.get("set"))
-        set_friendly = SetFriendly(obj.get("set_friendly"))
+        set_friendly = obj.get("set_friendly")
         time = from_int(obj.get("time"))
         side = from_int(obj.get("side"))
         world_unlock = from_bool(obj.get("world_unlock"))
@@ -135,7 +104,7 @@ class Difficulty:
         result["bpm"] = from_str(self.bpm)
         result["bpm_base"] = to_float(self.bpm_base)
         result["set"] = from_str(self.set)
-        result["set_friendly"] = to_enum(SetFriendly, self.set_friendly)
+        result["set_friendly"] = from_str(self.set_friendly)
         result["time"] = from_int(self.time)
         result["side"] = from_int(self.side)
         result["world_unlock"] = from_bool(self.world_unlock)

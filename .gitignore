@@ -1,6 +1,7 @@
-/venv
+venv
+venv-dev
 env_conf
-__pycache__/
+__pycache__
 *.pyc
 .vercel
 *.ps1

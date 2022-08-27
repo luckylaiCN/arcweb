@@ -1,7 +1,10 @@
-from pyDes import des , CBC , PAD_PKCS5
 import binascii
 
-class Controller:
+from pyDes import des
+from pyDes import CBC
+from pyDes import PAD_PKCS5
+
+class AuthController:
     def __init__(self,pk,default='000000001'):
         self.key = pk
         self.default = default
@@ -28,7 +31,7 @@ class Controller:
 if __name__ == "__main__":
     import os
     uid = input("input your id > ")
-    handler = Controller(os.environ.get("auth","mHAcxLYz"))
+    handler = AuthController(os.environ.get("auth","mHAcxLYz"))
     se_id = handler.generate_id(uid)
     print(f"Secret Id : {se_id}")
     print(f"Secret Id decrypted : {handler.get_id(se_id)}")

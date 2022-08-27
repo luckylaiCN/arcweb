@@ -2,19 +2,20 @@ import os
 import base64
 
 file_dir = os.path.dirname(os.path.abspath(__file__))
-svg_mod_path = os.path.join(file_dir,"mod.svg")
-svg_500_path = os.path.join(file_dir,"500.svg")
+svg_mod_path = os.path.join(file_dir, "mod.svg")
+svg_503_path = os.path.join(file_dir, "503.svg")
 with open(svg_mod_path) as f:
     svg_mod = f.read()
 
-with open(svg_500_path) as f:
-    svg_500 = f.read()
+with open(svg_503_path) as f:
+    svg_503 = f.read()
 
-rating_keys = ["0","1","2","3","4","5","6","7","off"]
+rating_keys = ["0", "1", "2", "3", "4", "5", "6", "7", "off"]
 rating_frames = {}
 for key in rating_keys:
-    with open(os.path.join(file_dir,"ptt",f"rating_{key}.png"),"rb") as f:
+    with open(os.path.join(file_dir, "ptt", f"rating_{key}.png"), "rb") as f:
         rating_frames[key] = base64.b64encode(f.read()).decode()
+
 
 def get_rating(ptt):
     if ptt == -1:
@@ -37,35 +38,38 @@ def get_rating(ptt):
     else:
         return "7"
 
-def return_500():
-    return svg_500
+
+def return_503():
+    return svg_503
+
 
 def get_difficulty(diff):
     if diff < 9:
         return str(int(diff))
     elif int(diff * 10) % 10 >= 7:
         return str(int(diff))+'+'
-    else :
+    else:
         return str(int(diff))
 
 
 def get_score_formatted(score):
-    full = str(score).rjust(8,'0')[-8:]
+    full = str(score).rjust(8, '0')[-8:]
     return f"{full[:2]}'{full[2:5]}'{full[5:8]}"
 
-def gen_svg(illustration_base64,ptt,username,score,songName,difficulty,difficulty_level,shiny_perfect_count,perfect_count,near_count,miss_count,play_time,play_ptt):
+
+def gen_svg(illustration_base64, ptt, username, score, songName, difficulty, difficulty_level, shiny_perfect_count, perfect_count, near_count, miss_count, play_time, play_ptt):
     result = svg_mod.format(
-        illustration = "data:image/jpeg;base64," + illustration_base64,
-        ratingFrame = "data:image/png;base64," + rating_frames[get_rating(ptt)],
-        ratingScore = "" if ptt==-1 else str(format("%.2f"%(ptt/100))),
-        username = username,
-        Score = get_score_formatted(score),
-        songName = songName,
-        difficulty = f"{difficulty} {get_difficulty(difficulty_level)}",
-        pureCount = f"{perfect_count}(+{shiny_perfect_count})",  
-        farCount = near_count,
-        lostCount = miss_count,
-        playTime = play_time,
-        playPTT = play_ptt
+        illustration="data:image/jpeg;base64," + illustration_base64,
+        ratingFrame="data:image/png;base64," + rating_frames[get_rating(ptt)],
+        ratingScore="" if ptt == -1 else str(format("%.2f" % (ptt/100))),
+        username=username,
+        Score=get_score_formatted(score),
+        songName=songName,
+        difficulty=f"{difficulty} {get_difficulty(difficulty_level)}",
+        pureCount=f"{perfect_count}(+{shiny_perfect_count})",
+        farCount=near_count,
+        lostCount=miss_count,
+        playTime=play_time,
+        playPTT=play_ptt
     )
     return result
