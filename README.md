@@ -22,7 +22,7 @@ An svg score generator in arcaea
 
 First of all , you should set an `auth` environmental variable , which should be the same as the one to be deployed to vercel
 
-Then head to `utils` folder and run 
+Then head to `utils` folder and run
 
 ```bash
 $ python3 auth.py # or python auth.py
@@ -57,3 +57,11 @@ timezone = "xxxxxx" # [optional] Asia/Shanghai for default
 ```
 
 Click `Deploy `and wait for building
+
+
+## Developing Environment
+
+```
+Python 3.8.4 (tags/v3.8.4:dfa645a, Jul 13 2020, 16:46:45) [MSC v.1924 64 bit (AMD64)] on win32
+Windows 7
+```

@@ -3,12 +3,12 @@ import base64
 
 file_dir = os.path.dirname(os.path.abspath(__file__))
 svg_mod_path = os.path.join(file_dir, "mod.svg")
-svg_500_path = os.path.join(file_dir, "500.svg")
+svg_503_path = os.path.join(file_dir, "503.svg")
 with open(svg_mod_path) as f:
     svg_mod = f.read()
 
-with open(svg_500_path) as f:
-    svg_500 = f.read()
+with open(svg_503_path) as f:
+    svg_503 = f.read()
 
 rating_keys = ["0", "1", "2", "3", "4", "5", "6", "7", "off"]
 rating_frames = {}
@@ -39,8 +39,8 @@ def get_rating(ptt):
         return "7"
 
 
-def return_500():
-    return svg_500
+def return_503():
+    return svg_503
 
 
 def get_difficulty(diff):

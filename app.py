@@ -3,7 +3,7 @@ from utils.auth import *
 from utils.svgGenerator import *
 from JSON.songlist import *
 from JSON.account import *
-import sys
+
 import os
 import base64
 import requests
@@ -18,9 +18,6 @@ from flask import Flask
 from flask import jsonify
 from flask import request
 from flask import render_template
-
-project_folder = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(project_folder)
 
 
 def pprint(*arg, **kwargs):
@@ -205,7 +202,7 @@ auth_handler = AuthController(auth_key, usercode)
 def route_index():
     request_user = auth_handler.get_id(request.args.get("s", "default"))
     svg = exception_handler.safe_handle(
-        lambda: arc_handler.generate_recent_svg(request_user), return_500)
+        lambda: arc_handler.generate_recent_svg(request_user), return_503)
     return app.response_class(svg, mimetype="image/svg+xml")
 
 
@@ -220,7 +217,7 @@ def route_best():
     svg = exception_handler.safe_handle(
         lambda: arc_handler.generate_best_svg(
             request_user, request.args.get("song"), request.args.get("difficulty")),
-        return_500
+        return_503
     )
     return app.response_class(svg, mimetype="image/svg+xml")
 
@@ -230,7 +227,7 @@ def route_songlist():
     return exception_handler.safe_handle(
         lambda: render_template(
             "songs.html", data=arc_handler.songs_html, s=request.args.get("s", "default")),
-        lambda: app.response_class(svg_500, mimetype="image/svg+xml")
+        lambda: app.response_class(svg_503, mimetype="image/svg+xml")
     )
 
 
