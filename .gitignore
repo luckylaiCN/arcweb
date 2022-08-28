@@ -5,3 +5,4 @@ __pycache__
 *.pyc
 .vercel
 *.ps1
+test.*

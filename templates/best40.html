@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    
+{% endblock head %}
+
+{% block body %}
+    <div id="container">
+        <div id="best40" class="col-md-10 offset-md-1 shadow-lg p-3 mb-5 bg-body rounded">
+            {% set count = namespace(value=0) %}
+            <div class="row">
+                {% for song in data %}
+                    {% set count.value = count.value + 1 %}
+                    <div class="col-4">
+                        <div class="card" >
+                            {% set uri = "/asset/illustration/" + song['id'] + "/" + song['difficulty']%}
+                            <a href="/pages/song/best?song={{song['id']}}&difficulty={{song['difficulty']}}&s={{s}}">
+                                <div style="width:100%;padding-bottom: 75%;overflow: hidden;background-image: url({{uri}});background-size: 100%;background-repeat: no-repeat;background-position: center center;">
+                                
+                                </div>
+                            </a>
+                            <div class="card-body">
+                                <h5 class="card-title">{{song["name"]}} (#{{count.value}})</h5>
+                                <p class="card-text">Best {{song["result"]["score"]}} ({{song["rating"]["obtained"]}} from  {{song["diff"]}} {{song["rating"]["full"]}})</p>
+                                <p class="card-text">P {{song["result"]["perfect"]}}(+{{song["result"]["shiny"]}})  F {{song["result"]["far"]}}  L {{song["result"]["lost"]}}</p>
+                                <p class="card-text">{{song["time_from"]}}</p>
+                              </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock body %}

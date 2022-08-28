@@ -39,10 +39,6 @@ def get_rating(ptt):
         return "7"
 
 
-def return_503():
-    return svg_503
-
-
 def get_difficulty(diff):
     if diff < 9:
         return str(int(diff))

@@ -1,14 +1,17 @@
 # **Arcweb**
 
-An svg score generator in arcaea
+Query your scores in arcaea through web app.
 
 ## Routes
 
-| route     | arg                  | interface            | example                       |
-| --------- | -------------------- | -------------------- | ----------------------------- |
-| /         | -                    | recently played song | /                             |
-| /best     | song and difficulty* | best score           | /best?song=nhelv&difficulty=1 |
-| /songlist | -                    | song list            | /songlist                     |
+| route                           | arg                  | interface                       |
+| ------------------------------- | -------------------- | ------------------------------- |
+| /image/recent                   | -                    | recently played song            |
+| /image/best                     | song and difficulty* | best score                      |
+| /pages/songlist                 | -                    | song list                       |
+| /pages/song/recent              | -                    | recently played song(html page) |
+| /pages/song/best                | song and difficulty* | best score(html page)           |
+| /pages/best30 or /pages/best40 | -                    | best30(best40) page             |
 
 ```
 *song is for songid in arcaea , can be found in songlist
@@ -57,7 +60,6 @@ timezone = "xxxxxx" # [optional] Asia/Shanghai for default
 ```
 
 Click `Deploy `and wait for building
-
 
 ## Developing Environment
 
