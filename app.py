@@ -11,13 +11,17 @@ import datetime
 import pytz
 import traceback
 import time
+import io
 
 from typing import List
 
+from urllib import parse
 from flask import Flask
 from flask import jsonify
 from flask import request
 from flask import render_template
+from flask import make_response
+from flask import send_file
 
 
 def pprint(*arg, **kwargs):
@@ -38,19 +42,32 @@ class ExceptionHandler:
         self.last = ""
         self.timestamp = 0
 
-    def safe_handle(self, func, onerror=do_nothing):
-        try:
-            return func()
-        except:
-            self.last = traceback.format_exc()
-            self.timestamp = int(time.time() * 1e3)
-            return onerror()
+    def record(self):
+        self.last = traceback.format_exc()
+        self.timestamp = int(time.time() * 1e3)
 
     def get_last_exception(self):
         return {
             "exception": self.last,
             "time": self.timestamp
         }
+
+def date_from(timestamp):
+    time0 = datetime.datetime.utcfromtimestamp(
+            timestamp / 1000)
+    utc_time = datetime.datetime(time0.year, time0.month, time0.day,
+                                    time0.hour, time0.minute, time0.second, time0.microsecond, tzinfo=utc)
+    datetime_zoned = utc_time.astimezone(py_timezone)
+    now = datetime.datetime.now().astimezone(py_timezone)
+    delta = now - datetime_zoned
+    time_str = datetime_zoned.strftime("%Y.%m.%d %H:%M:%S") + "  ("
+    if int(delta.days) > 0 :
+        return time_str + str(int(delta.days)) + " D)"
+    if delta.seconds > 3600:
+        return time_str + str(int(delta.seconds / 3600)) + " H)"
+    if delta.seconds > 60:
+        return time_str + str(int(delta.seconds / 60)) + " M)"
+    return time_str + str(int(delta.seconds)) + " S)"
 
 
 class ArcController:
@@ -124,6 +141,44 @@ class ArcController:
             f"user/best?usercode={uid}&songid={song_id}&difficulty={difficulty}"))
         return response.get("content")
 
+    def get_song_asset_api(self, song_id, difficulty):
+        return self.get_song_asset(song_id, difficulty.lower())
+
+    def get_user_best40(self, uid):
+        response: dict = self.get_json(ispublic=False, url=self.u(
+            f"user/best30?usercode={uid}&overflow=9"))
+        return response.get("content")
+
+    def get_user_best40_api(self,uid):
+        result = self.get_user_best40(uid)
+        content = account_best40_from_dict(result)
+        
+        b40 = content.best30_list[:]
+        b40.extend(content.best30_overflow)
+        resp = []
+        for song in b40:
+            info : Difficulty = self.song_id_difficulties_dict[song.song_id][song.difficulty]
+            resp.append({
+                "id" : song.song_id,
+                "name" : info.name_en,
+                "difficulty" : str(song.difficulty),
+                "diff" : ["PST","PRS","FTR","BYD"][song.difficulty],
+                "time_from" : date_from(song.time_played),
+                "result" : {
+                    "score" : song.score,
+                    "shiny" : song.shiny_perfect_count,
+                    "perfect" : song.perfect_count,
+                    "far" : song.near_count,
+                    "lost" : song.miss_count,
+                },
+                "rating":{
+                    "full" : info.rating / 10,
+                    "obtained" : round(song.rating,2)
+                }
+            })
+        return resp
+
+
     def generate_recent_svg(self, uid):
         if len(self.song_list) == 0:
             self.get_song_list()
@@ -187,6 +242,12 @@ class ArcController:
         return gen_svg(illustration_b64, rating, username, score, songname, difficulty, difficulty_level, shiny_perfect_count, perfect_count, near_count, miss_count, playtime, playptt)
 
 
+def make_cache_response(response, age=86400):
+    response = make_response(response)
+    response.headers["Cache-Control"] = "max-age=" + str(age)
+    return response
+
+
 url = os.environ["host"]
 token = os.environ["token"]
 usercode = os.environ["usercode"]
@@ -198,11 +259,10 @@ exception_handler = ExceptionHandler()
 auth_handler = AuthController(auth_key, usercode)
 
 
-@app.route("/")
-def route_index():
+@app.route("/image/recent")
+def route_recent():
     request_user = auth_handler.get_id(request.args.get("s", "default"))
-    svg = exception_handler.safe_handle(
-        lambda: arc_handler.generate_recent_svg(request_user), return_503)
+    svg = arc_handler.generate_recent_svg(request_user),
     return app.response_class(svg, mimetype="image/svg+xml")
 
 
@@ -211,25 +271,49 @@ def route_log():
     return jsonify(exception_handler.get_last_exception())
 
 
-@app.route("/best")
+@app.route("/image/best")
 def route_best():
     request_user = auth_handler.get_id(request.args.get("s", "default"))
-    svg = exception_handler.safe_handle(
-        lambda: arc_handler.generate_best_svg(
-            request_user, request.args.get("song"), request.args.get("difficulty")),
-        return_503
-    )
+    svg = arc_handler.generate_best_svg(
+        request_user, request.args.get("song"), request.args.get("difficulty"))
     return app.response_class(svg, mimetype="image/svg+xml")
 
 
-@app.route("/songlist")
+@app.route("/pages/songlist")
 def route_songlist():
-    return exception_handler.safe_handle(
-        lambda: render_template(
-            "songs.html", data=arc_handler.songs_html, s=request.args.get("s", "default")),
-        lambda: app.response_class(svg_503, mimetype="image/svg+xml")
+    return render_template(
+        "songs.html", data=arc_handler.songs_html, s=request.args.get("s", "default"))
+
+
+@app.route("/pages/song/<req_type>")
+def route_song(req_type):
+    subfix = req_type + "?" + parse.urlencode(request.args)
+    return render_template(
+        "song.html",subfix=subfix,s=request.args.get("s", "default")
     )
 
 
+@app.route("/asset/illustration/<song_id>/<difficulty>")
+def route_illustration(song_id, difficulty):
+    result = arc_handler.get_song_asset_api(song_id, difficulty)
+    return make_cache_response(send_file(
+        io.BytesIO(result),
+        mimetype="image/jpeg"
+    ))
+
+@app.route("/pages/best30")
+@app.route("/pages/best40")
+def route_best40():
+    request_user = auth_handler.get_id(request.args.get("s", "default"))
+    data = arc_handler.get_user_best40_api(request_user)
+    return render_template("best40.html",data=data,s=request.args.get("s", "default"))
+
+
+@app.errorhandler(500)
+def server_error(error):
+    return app.response_class(svg_503, mimetype="image/svg+xml")
+
+
 if __name__ == "__main__":
+    app.jinja_env.auto_reload = True
     app.run()

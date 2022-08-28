@@ -1,0 +1,1 @@
+function jump_EsXdr4(){$("#songlist").val().length && (window.location.hash = "#" + $("#songlist").val());}

@@ -1,26 +1,45 @@
-<!DOCTYPE html>
-<html>
-    <head>
+{% extends 'base.html' %}
 
-    </head>
-    <body>
+{% block head %}
+{% endblock head %}
+
+{% block body %}
+<div id="container" class="col-md-10 offset-md-1">
+    <div class="shadow-lg p-3 mb-5 bg-body rounded">
+        <div class="input-group">
+            <input class="form-control" list="datalistOptions" id="songlist" placeholder="Type to search...">
+            <button class="btn btn-primary" id="search" onclick="jump_EsXdr4()">Find</button>
+        </div>
+        <datalist id="datalistOptions">
+            {% for song in data %}
+                <option value="{{ song }}"></option>
+            {% endfor %}
+        </datalist>
+    </div>
+    <div class="shadow-lg p-3 mb-5 bg-body rounded">
         <div style="text-align: center;">
-            <table style="margin: auto;">
+            <table class="table-striped table table-bordered" style="margin: auto;">
                 {% for song in data %}
-                    <tr>
-                        <td style="width: 40%">{{ song }}</td>
-                        {% for difficulty in song.difficulties %}
-                            {% if difficulty %}
-                                <td style="width: 15%">
-                                    <a href="/best?song={{song.song_id}}&difficulty={{difficulty.key}}&s={{s}}">
-                                        {{ difficulty }}
-                                    </a>
-                                </td>
-                            {% endif %}
-                        {% endfor %}
-                    </tr>
-                {% endfor %}
+                <tr>
+                    <td style="width: 40%" id="{{ song }}">{{ song }}</td>
+                    {% for difficulty in song.difficulties %}
+                        {% if difficulty %}
+                            <td style="width: 15%">
+                                <a href="/pages/song/best?song={{song.song_id}}&difficulty={{difficulty.key}}&s={{s}}">
+                                    {{ difficulty }}
+                                </a>
+                            </td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+            {% endfor %}
             </table>
         </div>
-    </body>
-</html>
+    </div>
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <!-- back to top -->
+        <a href="#songlist" class="btn btn-primary">Top</a>
+    </div>
+</div>
+<script src="/static/js/main.js"></script>
+{% endblock body %}
