@@ -5,11 +5,12 @@
 
 {% block body %}
 <div id="container" class="col-md-10 offset-md-1">
-    <div class="shadow-lg p-3 mb-5 bg-body rounded">
-        <div class="input-group">
+    <div class="shadow-lg p-3 mb-5 bg-body rounded" id="top">
+        <h3>Find a song</h3>
+        <form onsubmit="jump_EsXdr4()" class="input-group">
             <input class="form-control" list="datalistOptions" id="songlist" placeholder="Type to search...">
-            <button class="btn btn-primary" id="search" onclick="jump_EsXdr4()">Find</button>
-        </div>
+            <button class="btn btn-primary" id="search" type="submit">Find</button>
+        </form>
         <datalist id="datalistOptions">
             {% for song in data %}
                 <option value="{{ song }}"></option>
@@ -17,17 +18,31 @@
         </datalist>
     </div>
     <div class="shadow-lg p-3 mb-5 bg-body rounded">
+        <h3>Song table</h3>
         <div style="text-align: center;">
             <table class="table-striped table table-bordered" style="margin: auto;">
                 {% for song in data %}
                 <tr>
-                    <td style="width: 40%" id="{{ song }}">{{ song }}</td>
+                    <td style="width: 32%" id="{{ song }}">{{ song }}</td>
                     {% for difficulty in song.difficulties %}
                         {% if difficulty %}
-                            <td style="width: 15%">
-                                <a href="/pages/song/best?song={{song.song_id}}&difficulty={{difficulty.key}}&s={{s}}">
-                                    {{ difficulty }}
-                                </a>
+                            <td style="width: 17%">
+                                {{ difficulty }}
+                                <span class="d-inline-block" tabindex="0" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-content="Best score">
+                                    <a href="/pages/song/best?song={{song.song_id}}&difficulty={{difficulty.key}}&s={{s}}" >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-up-square" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd" d="M15 2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm8.5 9.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V11.5z"/>
+                                          </svg>
+                                    </a>
+                                </span>
+                                <span class="d-inline-block" tabindex="0" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-content="Preview chart">
+                                    <a href="/pages/song/preview?song={{song.song_id}}&difficulty={{difficulty.key}}&s={{s}}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
+                                            <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+                                            <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+                                          </svg>
+                                    </a>
+                                </span>
                             </td>
                         {% endif %}
                     {% endfor %}
@@ -38,7 +53,7 @@
     </div>
     <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
         <!-- back to top -->
-        <a href="#songlist" class="btn btn-primary">Top</a>
+        <a href="#nav" class="btn btn-primary">Top</a>
     </div>
 </div>
 <script src="/static/js/main.js"></script>

@@ -114,6 +114,9 @@ class ArcController:
     def get_song_asset(self, song_id, difficulty):
         return self.get_content(url=self.u(f"assets/song?songid={song_id}&difficulty={difficulty}"), ispublic=False)
 
+    def get_song_preview(self, song_id, difficulty):
+        return self.get_content(url=self.u(f"assets/preview?songid={song_id}&difficulty={difficulty}"), ispublic=False)
+
     def get_song_list(self):
         response = self.get_json(url=self.u("song/list"))
         if response is None:
@@ -141,8 +144,11 @@ class ArcController:
             f"user/best?usercode={uid}&songid={song_id}&difficulty={difficulty}"))
         return response.get("content")
 
-    def get_song_asset_api(self, song_id, difficulty):
+    def get_song_asset_api(self, song_id, difficulty : str):
         return self.get_song_asset(song_id, difficulty.lower())
+
+    def get_song_preview_api(self,song_id, difficulty:str):
+        return self.get_song_preview(song_id, difficulty.lower())
 
     def get_user_best40(self, uid):
         response: dict = self.get_json(ispublic=False, url=self.u(
@@ -312,6 +318,16 @@ def route_best40():
 @app.errorhandler(500)
 def server_error(error):
     return app.response_class(svg_503, mimetype="image/svg+xml")
+
+@app.route("/image/preview")
+def route_preview():
+    song_id = request.args.get("song")
+    difficulty = request.args.get("difficulty")
+    result = arc_handler.get_song_preview_api(song_id, difficulty)
+    return make_cache_response(send_file(
+        io.BytesIO(result),
+        mimetype="image/png"
+    ))
 
 
 if __name__ == "__main__":
