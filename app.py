@@ -250,7 +250,7 @@ class ArcController:
 
 def make_cache_response(response, age=86400):
     response = make_response(response)
-    response.headers["Cache-Control"] = "max-age=" + str(age)
+    response.headers["Cache-Control"] = "public, max-age=" + str(age)
     return response
 
 
@@ -305,7 +305,7 @@ def route_illustration(song_id, difficulty):
     return make_cache_response(send_file(
         io.BytesIO(result),
         mimetype="image/jpeg"
-    ))
+    ),129600)
 
 @app.route("/pages/best30")
 @app.route("/pages/best40")
@@ -327,7 +327,7 @@ def route_preview():
     return make_cache_response(send_file(
         io.BytesIO(result),
         mimetype="image/png"
-    ))
+    ),129600)
 
 
 if __name__ == "__main__":
