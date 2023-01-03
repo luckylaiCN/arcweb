@@ -71,6 +71,7 @@ def date_from(timestamp):
 
 
 class ArcController:
+    song_list_update_time : int
     song_list: List[SongListElement]
     song_id_difficulties_dict: dict
 
@@ -85,6 +86,7 @@ class ArcController:
         self.song_list = []
         self.song_id_difficulties_dict = {}
         self.songs_html = []
+        self.song_list_update_time = 0
         self.get_song_list()
 
     def get(self, ispublic=True, *arg, **kwargs):
@@ -132,14 +134,21 @@ class ArcController:
             self.song_id_difficulties_dict[item.song_id] = item.difficulties
             self.songs_html.append(Song(item))
         self.songs_html.sort(key=lambda x: x.song_name)
+        self.song_list_update_time = time.time()
         return self.song_list
 
+    def check_update(self):
+        if time.time() - self.song_list_update_time > 86400:
+            self.get_song_list()
+
     def get_user_by_code(self, uid):
+        self.check_update()
         response: dict = self.get_json(url=self.u(
             f"user/info?usercode={uid}"), ispublic=False)
         return response.get("content")
 
     def get_user_best(self, uid, song_id, difficulty):
+        self.check_update()
         response: dict = self.get_json(ispublic=False, url=self.u(
             f"user/best?usercode={uid}&songid={song_id}&difficulty={difficulty}"))
         return response.get("content")
@@ -151,6 +160,7 @@ class ArcController:
         return self.get_song_preview(song_id, difficulty.lower())
 
     def get_user_best40(self, uid):
+        self.check_update()
         response: dict = self.get_json(ispublic=False, url=self.u(
             f"user/best30?usercode={uid}&overflow=9"))
         return response.get("content")
@@ -184,10 +194,11 @@ class ArcController:
             })
         return resp
 
+    def update_list_now(self):
+        return self.get_song_list()
+
 
     def generate_recent_svg(self, uid):
-        if len(self.song_list) == 0:
-            self.get_song_list()
         response = self.get_user_by_code(uid)
         this_account: Account = account_from_dict(response)
         recent_play_song = this_account.recent_score[0]
@@ -217,8 +228,6 @@ class ArcController:
         return gen_svg(illustration_b64, rating, username, score, songname, difficulty, difficulty_level, shiny_perfect_count, perfect_count, near_count, miss_count, playtime, playptt)
 
     def generate_best_svg(self, uid, song_id, difficulty):
-        if len(self.song_list) == 0:
-            self.get_song_list()
         response = self.get_user_best(uid, song_id, difficulty)
         this_account: AccountBest = account_best_from_dict(response)
         recent_play_song = this_account.record
@@ -264,7 +273,6 @@ arc_handler = ArcController(url, token)
 exception_handler = ExceptionHandler()
 auth_handler = AuthController(auth_key, usercode)
 
-
 @app.route("/image/recent")
 def route_recent():
     request_user = auth_handler.get_id(request.args.get("s", "default"))
@@ -284,7 +292,7 @@ def route_best():
         request_user, request.args.get("song"), request.args.get("difficulty"))
     return app.response_class(svg, mimetype="image/svg+xml")
 
-
+@app.route("/")
 @app.route("/pages/songlist")
 def route_songlist():
     return render_template(
@@ -328,6 +336,10 @@ def route_preview():
         io.BytesIO(result),
         mimetype="image/png"
     ),129600)
+
+@app.route("/admin/update")
+def update_songlist():
+    return jsonify(arc_handler.update_list_now())
 
 
 if __name__ == "__main__":
