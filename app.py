@@ -266,7 +266,7 @@ def make_cache_response(response, age=86400):
 url = os.environ["host"]
 token = os.environ["token"]
 usercode = os.environ["usercode"]
-auth_key = os.environ["auth"]
+auth_key = os.environ.get("auth")
 
 app = Flask(__name__)
 arc_handler = ArcController(url, token)
