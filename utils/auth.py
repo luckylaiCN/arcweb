@@ -6,7 +6,6 @@ from pyDes import PAD_PKCS5
 
 class AuthController:
     def __init__(self,pk,default='000000001'):
-        print(pk)
         if pk is None:
             self.use_secret = False
         else:
