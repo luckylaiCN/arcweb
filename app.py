@@ -266,7 +266,7 @@ def make_cache_response(response, age=86400):
 url = os.environ["host"]
 token = os.environ["token"]
 usercode = os.environ["usercode"]
-auth_key = os.environ["auth"]
+auth_key = os.environ.get("auth")
 
 app = Flask(__name__)
 arc_handler = ArcController(url, token)
@@ -319,6 +319,7 @@ def route_illustration(song_id, difficulty):
 @app.route("/pages/best40")
 def route_best40():
     request_user = auth_handler.get_id(request.args.get("s", "default"))
+    print(request_user)
     data = arc_handler.get_user_best40_api(request_user)
     return render_template("best40.html",data=data,s=request.args.get("s", "default"))
 
