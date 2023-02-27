@@ -17,4 +17,4 @@ requests==2.28.1
 toml==0.10.2
 urllib3==1.26.12
 Werkzeug==2.2.2
-zipp==3.8.1
+zipp==3.15.0
